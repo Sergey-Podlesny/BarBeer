@@ -10,7 +10,7 @@ namespace BarBeer.Models
         public int Id { get; set; }
         public int BarId { get; set; }
         public int UserId { get; set; }
-        public string Comment1 { get; set; }
+        public string Text { get; set; }
 
         public virtual Bar Bar { get; set; }
         public virtual User User { get; set; }

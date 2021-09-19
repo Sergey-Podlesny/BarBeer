@@ -39,35 +39,37 @@ namespace BarBeer.Context
             {
                 entity.Property(e => e.BarImage)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.BarLocation)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.BarName)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Comment>(entity =>
             {
-                entity.Property(e => e.Comment1)
+                entity.Property(e => e.Text)
                     .IsRequired()
                     .HasMaxLength(50)
+                    .IsUnicode(false)
                     .HasColumnName("Comment");
 
                 entity.HasOne(d => d.Bar)
                     .WithMany(p => p.Comments)
                     .HasForeignKey(d => d.BarId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Comments__BarId__52593CB8");
+                    .HasConstraintName("FK__Comments__BarId__656C112C");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Comments)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Comments__UserId__534D60F1");
+                    .HasConstraintName("FK__Comments__UserId__66603565");
             });
 
             modelBuilder.Entity<PersonalBestBar>(entity =>
@@ -75,32 +77,33 @@ namespace BarBeer.Context
                 entity.HasOne(d => d.Bar)
                     .WithMany(p => p.PersonalBestBars)
                     .HasForeignKey(d => d.BarId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__PersonalB__BarId__4E88ABD4");
+                    .HasConstraintName("FK__PersonalB__BarId__619B8048");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.PersonalBestBars)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__PersonalB__UserI__4F7CD00D");
+                    .HasConstraintName("FK__PersonalB__UserI__628FA481");
             });
 
             modelBuilder.Entity<User>(entity =>
             {
-                entity.HasIndex(e => e.UserLogin, "UQ__Users__7F8E8D5E05F21F02")
+                entity.HasIndex(e => e.UserLogin, "UQ__Users__7F8E8D5E7183C904")
                     .IsUnique();
 
                 entity.Property(e => e.UserLogin)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.UserPassword)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.UserRole)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
             });
 
             OnModelCreatingPartial(modelBuilder);

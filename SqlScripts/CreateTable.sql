@@ -1,31 +1,31 @@
 create table Bars
 (
 	Id int primary key identity,
-	BarName nvarchar(50) not null,
-	BarImage nvarchar(50) not null,
+	BarName varchar(50) not null,
+	BarImage varchar(50) not null,
 	BarRating float null,
-	BarLocation nvarchar(50) not null,
+	BarLocation varchar(50) not null,
 )
 
 create table Users
 (
 	Id int primary key identity,
-	UserLogin nvarchar(50) not null unique,
-	UserPassword nvarchar(50) not null,
-	UserRole nvarchar(50) not null	
+	UserLogin varchar(50) not null unique,
+	UserPassword varchar(50) not null,
+	UserRole varchar(50) not null	
 )
 
 create table PersonalBestBars
 (
 	Id int primary key identity,
-	BarId int not null references Bars(Id),
-	UserId int not null references Users(Id)
+	BarId int not null references Bars(Id) on delete cascade,
+	UserId int not null references Users(Id) on delete cascade
 )
 
 create table Comments
 (
 	Id int primary key identity,
-	BarId int not null references Bars(Id),
-	UserId int not null references Users(Id),
-	Comment nvarchar(50) not null
+	BarId int not null references Bars(Id) on delete cascade,
+	UserId int not null references Users(Id) on delete cascade,
+	Comment varchar(50) not null
 )

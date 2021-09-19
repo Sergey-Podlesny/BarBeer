@@ -1,29 +1,40 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BarBeer.Context;
+using BarBeer.Models;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace BarBeer.Controllers
 {
     public class BarController : Controller
     {
-
-        public JsonResult BarList(int id)
+        private BarBeerContext dbContext;
+        public BarController(BarBeerContext context)
         {
-            if(id == 0)
+            dbContext = context;
+        }
+
+        public JsonResult Index()
+        {
+            return default;
+        }
+        public async Task<JsonResult> List(int id)
+        {
+            if (id != 0)
             {
-                return new JsonResult("no id");
+                Bar bar = await dbContext.Bars.FirstOrDefaultAsync(bar => bar.Id == id);
+                JsonResult jsonResult = new JsonResult(bar);
+                return jsonResult;
             }
             else
             {
-                return ConcreteBar(id);
+                return new JsonResult(dbContext.Bars);
             }
         }
 
-        private JsonResult ConcreteBar(int id)
-        {
-            return new JsonResult(id);
-        }
+        
     }
 }
