@@ -28,7 +28,7 @@ namespace BarBeer
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<BarBeerContext>(options =>
                 options.UseSqlServer(connection));
-            services.AddMvc();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,9 +43,7 @@ namespace BarBeer
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=bar}/{action=barlist}/{id?}");
+                endpoints.MapControllers();
             });
         }
     }

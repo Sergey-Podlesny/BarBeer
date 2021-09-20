@@ -10,40 +10,44 @@ using BarBeer.ViewModels;
 
 namespace BarBeer.Controllers
 {
-    public class UserController : Controller
+    [Route("[Controller]")]
+    [ApiController]
+    public class UserController : ControllerBase
     {
         private BarBeerContext dbContext;
         public UserController(BarBeerContext context)
         {
             dbContext = context;
         }
-        public IActionResult Index()
-        {
-            return default;
-        }
+
 
         [HttpGet]
-        public async Task<JsonResult> List(int id)
+        public JsonResult Get()
         {
-            if (id != 0)
+            return new JsonResult(dbContext.Users);
+        }
+
+
+        [HttpGet("{id}")]
+        public async Task<JsonResult> Get(int id)
+        {
+            JsonResult result;
+            User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+            if (user == null)
             {
-                User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
-                if(user == null)
-                {
-                    HttpContext.Response.StatusCode = 404;
-                    return new JsonResult(StatusCode(404));
-                }
-                JsonResult jsonResult = new JsonResult(user);
-                return jsonResult;
+                HttpContext.Response.StatusCode = 404;
+                result = new JsonResult(StatusCode(404));
             }
             else
             {
-                return new JsonResult(dbContext.Users);
+                result = new JsonResult(user);
             }
+            return result;
         }
 
+
         [HttpPost]
-        public async void Create([FromBody]UserViewModel model)
+        public async void Post([FromBody]UserViewModel model)
         {
             User user = new User { UserLogin = model.UserLogin, UserPassword = model.UserPassword, UserRole = model.UserRole };
             await dbContext.AddAsync(user);
@@ -62,20 +66,23 @@ namespace BarBeer.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task Delete(int id)
+
+        [HttpPut("{id}")]
+        public async Task Put(int id, [FromBody]UserViewModel model)
         {
-            User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
-            if (user == null)
+            if (model == null)
             {
                 HttpContext.Response.StatusCode = 404;
             }
             else
             {
-                
+                User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+                user.UserLogin = model.UserLogin;
+                user.UserPassword = model.UserPassword;
+                user.UserRole = model.UserRole;
                 try
                 {
-                    dbContext.Remove(user);
+                    dbContext.Users.Update(user);
                     dbContext.SaveChanges();
                     HttpContext.Response.StatusCode = 200;
                 }
@@ -86,22 +93,19 @@ namespace BarBeer.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task Edit([FromBody]UserViewModel model)
+        [HttpDelete("{id}")]
+        public async Task Delete(int id)
         {
-            if (model == null)
+            User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+            if (user == null)
             {
                 HttpContext.Response.StatusCode = 404;
             }
             else
             {
-                User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == model.Id);
-                user.UserLogin = model.UserLogin;
-                user.UserPassword = model.UserPassword;
-                user.UserRole = model.UserRole;
                 try
                 {
-                    dbContext.Users.Update(user);
+                    dbContext.Users.Remove(user);
                     dbContext.SaveChanges();
                     HttpContext.Response.StatusCode = 200;
                 }
