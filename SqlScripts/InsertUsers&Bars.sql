@@ -1,3 +1,4 @@
+use BarBeer
 insert into Users 
 values
 ('Krot99', '12345', 'Visitor'),

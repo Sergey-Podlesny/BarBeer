@@ -1,3 +1,4 @@
+use BarBeer
 create table Bars
 (
 	Id int primary key identity,
