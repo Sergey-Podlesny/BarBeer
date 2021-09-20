@@ -51,7 +51,7 @@ namespace BarBeer.Controllers
 
 
         [HttpPost]
-        public async Task Post([FromBody] BarViewModel model)
+        public async Task<JsonResult> Post([FromBody] BarViewModel model)
         {
             Bar bar = new Bar { BarName = model.BarName, BarImage = model.BarImage, BarRating = model.BarRating, BarLocation = model.BarLocation };
             await dbContext.AddAsync(bar);
@@ -70,10 +70,11 @@ namespace BarBeer.Controllers
             {
                 HttpContext.Response.StatusCode = 500;
             }
+            return new JsonResult(bar.Id);
         }
 
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody] BarViewModel model)
+        public async Task<JsonResult> Put(int id, [FromBody] BarViewModel model)
         {
             if(model == null)
             {
@@ -104,10 +105,11 @@ namespace BarBeer.Controllers
                     }
                 }
             }
+            return new JsonResult(id);
         }
 
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<JsonResult> Delete(int id)
         {
             Bar bar = await dbContext.Bars.FirstOrDefaultAsync(bar => bar.Id == id);
             if (bar == null)
@@ -127,6 +129,7 @@ namespace BarBeer.Controllers
                     HttpContext.Response.StatusCode = 500;
                 }
             }
+            return new JsonResult(id);
         }
     }
 }

@@ -47,7 +47,7 @@ namespace BarBeer.Controllers
 
 
         [HttpPost]
-        public async void Post([FromBody]UserViewModel model)
+        public async Task<JsonResult> Post([FromBody]UserViewModel model)
         {
             User user = new User { UserLogin = model.UserLogin, UserPassword = model.UserPassword, UserRole = model.UserRole };
             await dbContext.AddAsync(user);
@@ -64,11 +64,12 @@ namespace BarBeer.Controllers
             {
                 HttpContext.Response.StatusCode = 500;
             }
+            return new JsonResult(user.Id);
         }
 
 
         [HttpPut("{id}")]
-        public async Task Put(int id, [FromBody]UserViewModel model)
+        public async Task<JsonResult> Put(int id, [FromBody]UserViewModel model)
         {
             if (model == null)
             {
@@ -77,24 +78,32 @@ namespace BarBeer.Controllers
             else
             {
                 User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
-                user.UserLogin = model.UserLogin;
-                user.UserPassword = model.UserPassword;
-                user.UserRole = model.UserRole;
-                try
+                if (user == null)
                 {
-                    dbContext.Users.Update(user);
-                    dbContext.SaveChanges();
-                    HttpContext.Response.StatusCode = 200;
+                    HttpContext.Response.StatusCode = 404;
                 }
-                catch(Exception ex)
+                else
                 {
-                    HttpContext.Response.StatusCode = 500;
+                    user.UserLogin = model.UserLogin;
+                    user.UserPassword = model.UserPassword;
+                    user.UserRole = model.UserRole;
+                    try
+                    {
+                        dbContext.Users.Update(user);
+                        dbContext.SaveChanges();
+                        HttpContext.Response.StatusCode = 200;
+                    }
+                    catch (Exception ex)
+                    {
+                        HttpContext.Response.StatusCode = 500;
+                    }
                 }
             }
+            return new JsonResult(id);
         }
 
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<JsonResult> Delete(int id)
         {
             User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
             if (user == null)
@@ -114,6 +123,7 @@ namespace BarBeer.Controllers
                     HttpContext.Response.StatusCode = 500;
                 }
             }
+            return new JsonResult(id);
         }
     }
 }
