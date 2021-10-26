@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using BarBeer.Context;
 using BarBeer.Models;
 using BarBeer.ViewModels;
+using BarBeer.Services;
+using BarBeer.Exceptions;
 
 namespace BarBeer.Controllers
 {
@@ -14,17 +16,18 @@ namespace BarBeer.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private BarBeerContext dbContext;
-        public UserController(BarBeerContext context)
+        private IUserService _userService;
+        public UserController(IUserService userService)
         {
-            dbContext = context;
+            _userService = userService;
         }
 
 
         [HttpGet]
         public JsonResult Get()
         {
-            return new JsonResult(dbContext.Users);
+            var users = _userService.GetUsers();
+            return new JsonResult(users);
         }
 
 
@@ -32,7 +35,8 @@ namespace BarBeer.Controllers
         public async Task<JsonResult> Get(int id)
         {
             JsonResult result;
-            User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+            var user = await _userService.GetUserById(id);
+
             if (user == null)
             {
                 HttpContext.Response.StatusCode = 404;
@@ -42,6 +46,7 @@ namespace BarBeer.Controllers
             {
                 result = new JsonResult(user);
             }
+
             return result;
         }
 
@@ -49,14 +54,13 @@ namespace BarBeer.Controllers
         [HttpPost]
         public async Task<JsonResult> Post([FromBody]UserViewModel model)
         {
-            User user = new User { UserLogin = model.UserLogin, UserPassword = model.UserPassword, UserRole = model.UserRole };
-            await dbContext.AddAsync(user);
+            int id = default;
             try
             {
-                dbContext.SaveChanges();
+                id = await _userService.CreateUser(model);
                 HttpContext.Response.StatusCode = 201;
             }
-            catch(DbUpdateException ex)
+            catch(DbUpdateException)
             {
                 HttpContext.Response.StatusCode = 400;
             }
@@ -64,64 +68,49 @@ namespace BarBeer.Controllers
             {
                 HttpContext.Response.StatusCode = 500;
             }
-            return new JsonResult(user.Id);
+            return new JsonResult(id);
         }
 
 
         [HttpPut("{id}")]
         public async Task<JsonResult> Put(int id, [FromBody]UserViewModel model)
         {
-            if (model == null)
+            try
+            {
+                await _userService.UpdateUser(id, model);
+                HttpContext.Response.StatusCode = 200;
+            }
+            catch (InvalidModelException)
+            {
+                HttpContext.Response.StatusCode = 400;
+            }
+            catch (NotFoundException)
             {
                 HttpContext.Response.StatusCode = 404;
             }
-            else
+            catch (InternalServerErrorException)
             {
-                User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
-                if (user == null)
-                {
-                    HttpContext.Response.StatusCode = 404;
-                }
-                else
-                {
-                    user.UserLogin = model.UserLogin;
-                    user.UserPassword = model.UserPassword;
-                    user.UserRole = model.UserRole;
-                    try
-                    {
-                        dbContext.Users.Update(user);
-                        dbContext.SaveChanges();
-                        HttpContext.Response.StatusCode = 200;
-                    }
-                    catch (Exception ex)
-                    {
-                        HttpContext.Response.StatusCode = 500;
-                    }
-                }
+                HttpContext.Response.StatusCode = 500;
             }
+
             return new JsonResult(id);
         }
 
         [HttpDelete("{id}")]
         public async Task<JsonResult> Delete(int id)
         {
-            User user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
-            if (user == null)
+            try
+            {
+                await _userService.DeleteUserById(id);
+                HttpContext.Response.StatusCode = 200;
+            }
+            catch(NotFoundException)
             {
                 HttpContext.Response.StatusCode = 404;
             }
-            else
+            catch
             {
-                try
-                {
-                    dbContext.Users.Remove(user);
-                    dbContext.SaveChanges();
-                    HttpContext.Response.StatusCode = 200;
-                }
-                catch(Exception ex)
-                {
-                    HttpContext.Response.StatusCode = 500;
-                }
+                HttpContext.Response.StatusCode = 500;
             }
             return new JsonResult(id);
         }

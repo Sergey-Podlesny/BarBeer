@@ -11,6 +11,8 @@ using BarBeer.Controllers;
 using Microsoft.Extensions.Configuration;
 using BarBeer.Context;
 using Microsoft.EntityFrameworkCore;
+using BarBeer.Services;
+using BarBeer.Services.Implementations;
 
 namespace BarBeer
 {
@@ -29,6 +31,10 @@ namespace BarBeer
             services.AddDbContext<BarBeerContext>(options =>
                 options.UseSqlServer(connection));
             services.AddControllers();
+            services.AddScoped<IUserService, UserService>()
+                    .AddScoped<IBarService, BarService>()
+                    .AddScoped<UserController>()
+                    .AddScoped<BarController>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

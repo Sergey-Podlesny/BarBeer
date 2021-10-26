@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using BarBeer.ViewModels;
 using System.Text;
+using BarBeer.Services;
+using BarBeer.Exceptions;
 
 namespace BarBeer.Controllers
 {
@@ -15,35 +17,34 @@ namespace BarBeer.Controllers
     [ApiController]
     public class BarController : ControllerBase
     {
-        private BarBeerContext dbContext;
-        public BarController(BarBeerContext context)
+        private IBarService _barService;
+        public BarController(IBarService barService)
         {
-            dbContext = context;
+            _barService = barService;
         }
 
 
         [HttpGet]
-        public JsonResult Get()
+        public JsonResult GetBar()
         {
-            return new JsonResult(dbContext.Bars);
+            var bars = _barService.GetBars();
+            return new JsonResult(bars);
         }
 
         [HttpGet("{id}")]
-        public async Task<JsonResult> Get(int id)
+        public async Task<JsonResult> GetBar(int id)
         {
             JsonResult result;
-            Bar bar = await dbContext.Bars.FirstOrDefaultAsync(bar => bar.Id == id);
+            var bar = await _barService.GetBarById(id);
+            
             if (bar == null)
             {
                 HttpContext.Response.StatusCode = 404;
-                //byte[] data = Encoding.ASCII.GetBytes("Incorrected ID");
-                //await HttpContext.Response.Body.WriteAsync(data, 0, data.Length);
                 result = new JsonResult(StatusCode(404));
             }
             else
             {
                 result = new JsonResult(bar);
-
             }
             return result;
 
@@ -51,83 +52,64 @@ namespace BarBeer.Controllers
 
 
         [HttpPost]
-        public async Task<JsonResult> Post([FromBody] BarViewModel model)
+        public async Task<JsonResult> PostBar([FromBody] BarViewModel model)
         {
-            Bar bar = new Bar { BarName = model.BarName, BarImage = model.BarImage, BarRating = model.BarRating, BarLocation = model.BarLocation };
-            await dbContext.AddAsync(bar);
+            int id = default;
             try
             {
-                dbContext.SaveChanges();
+                id = await _barService.CreateBar(model);
                 HttpContext.Response.StatusCode = 201;
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
                 HttpContext.Response.StatusCode = 400;
-                //byte[] data = Encoding.ASCII.GetBytes(ex.Message);
-                //await HttpContext.Response.Body.WriteAsync(data, 0, data.Length);
             }
             catch
             {
                 HttpContext.Response.StatusCode = 500;
             }
-            return new JsonResult(bar.Id);
+            return new JsonResult(id);
         }
 
         [HttpPut("{id}")]
-        public async Task<JsonResult> Put(int id, [FromBody] BarViewModel model)
+        public async Task<JsonResult> PutBar(int id, [FromBody] BarViewModel model)
         {
-            if(model == null)
+            try
+            {
+                await _barService.UpdateBar(id, model);
+                HttpContext.Response.StatusCode = 200;
+            }
+            catch (InvalidModelException)
+            {
+                HttpContext.Response.StatusCode = 400;
+            }
+            catch (NotFoundException)
             {
                 HttpContext.Response.StatusCode = 404;
             }
-            else
+            catch (InternalServerErrorException)
             {
-                Bar bar = await dbContext.Bars.FirstOrDefaultAsync(bar => bar.Id == id);
-                if(bar == null)
-                {
-                    HttpContext.Response.StatusCode = 404;
-                }
-                else
-                {
-                    bar.BarName = model.BarName;
-                    bar.BarImage = model.BarImage;
-                    bar.BarRating = model.BarRating;
-                    bar.BarLocation = model.BarLocation;
-                    try
-                    {
-                        dbContext.Bars.Update(bar);
-                        dbContext.SaveChanges();
-                        HttpContext.Response.StatusCode = 200;
-                    }
-                    catch (Exception ex)
-                    {
-                        HttpContext.Response.StatusCode = 500;
-                    }
-                }
+                HttpContext.Response.StatusCode = 500;
             }
+
             return new JsonResult(id);
         }
 
         [HttpDelete("{id}")]
-        public async Task<JsonResult> Delete(int id)
+        public async Task<JsonResult> DeleteBar(int id)
         {
-            Bar bar = await dbContext.Bars.FirstOrDefaultAsync(bar => bar.Id == id);
-            if (bar == null)
+            try
+            {
+                await _barService.DeleteBarById(id);
+                HttpContext.Response.StatusCode = 200;
+            }
+            catch (NotFoundException)
             {
                 HttpContext.Response.StatusCode = 404;
             }
-            else
+            catch
             {
-                try
-                {
-                    dbContext.Bars.Remove(bar);
-                    dbContext.SaveChanges();
-                    HttpContext.Response.StatusCode = 200;
-                }
-                catch(Exception ex)
-                {
-                    HttpContext.Response.StatusCode = 500;
-                }
+                HttpContext.Response.StatusCode = 500;
             }
             return new JsonResult(id);
         }
