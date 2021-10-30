@@ -24,7 +24,12 @@ namespace BarBeer.Services.Implementations
         }
         public async Task<User> GetUserById(int id)
         {
-            return await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+            var user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+            if(user == null)
+            {
+                throw new NotFoundException();
+            }
+            return user;
         }
 
         public async Task<int> CreateUser(UserViewModel model)

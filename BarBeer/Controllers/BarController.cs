@@ -27,57 +27,51 @@ namespace BarBeer.Controllers
         [HttpGet]
         public JsonResult GetBar()
         {
-            var bars = _barService.GetBars();
+            var bars = _barService.GetBarsAsync();
             return new JsonResult(bars);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("{id}")]
         public async Task<JsonResult> GetBar(int id)
         {
             JsonResult result;
-            var bar = await _barService.GetBarById(id);
-            
-            if (bar == null)
+            try
+            {
+                var bar = await _barService.GetBarByIdAsync(id);
+                result = new JsonResult(bar);
+            }
+            catch(NotFoundException)
             {
                 HttpContext.Response.StatusCode = 404;
                 result = new JsonResult(StatusCode(404));
             }
-            else
-            {
-                result = new JsonResult(bar);
-            }
             return result;
-
         }
-
 
         [HttpPost]
         public async Task<JsonResult> PostBar([FromBody] BarViewModel model)
         {
-            int id = default;
+            var id = -1;
             try
             {
-                id = await _barService.CreateBar(model);
+                id = await _barService.CreateBarAsync(model);
                 HttpContext.Response.StatusCode = 201;
             }
             catch (DbUpdateException)
             {
                 HttpContext.Response.StatusCode = 400;
             }
-            catch
-            {
-                HttpContext.Response.StatusCode = 500;
-            }
             return new JsonResult(id);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut]
+        [Route("{id}")]
         public async Task<JsonResult> PutBar(int id, [FromBody] BarViewModel model)
         {
             try
             {
-                await _barService.UpdateBar(id, model);
-                HttpContext.Response.StatusCode = 200;
+                await _barService.UpdateBarAsync(id, model);
             }
             catch (InvalidModelException)
             {
@@ -91,27 +85,62 @@ namespace BarBeer.Controllers
             {
                 HttpContext.Response.StatusCode = 500;
             }
-
             return new JsonResult(id);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete]
+        [Route("{id}")]
         public async Task<JsonResult> DeleteBar(int id)
         {
             try
             {
-                await _barService.DeleteBarById(id);
-                HttpContext.Response.StatusCode = 200;
+                await _barService.DeleteBarByIdAsync(id);
             }
             catch (NotFoundException)
             {
                 HttpContext.Response.StatusCode = 404;
             }
-            catch
-            {
-                HttpContext.Response.StatusCode = 500;
-            }
             return new JsonResult(id);
+        }
+
+        [HttpGet]
+        [Route("get-comments-by-bar-id")]
+        public async Task<JsonResult> GetCommentsByBarId(int id)
+        {
+            var comments = await _barService.GetCommentsByBarIdAsync(id);
+            return new JsonResult(comments);
+        }
+
+        [HttpGet]
+        [Route("get-comments-by-user-id")]
+        public async Task<JsonResult> GetCommentsByUserId(int id)
+        {
+            var comments = await _barService.GetCommentsByUserIdAsync(id);
+            return new JsonResult(comments);
+        }
+
+        [HttpGet]
+        [Route("get-bar-by-name")]
+        public async Task<JsonResult> GetBarByName(string name)
+        {
+            var bar = await _barService.GetBarByNameAsync(name);
+            return new JsonResult(bar);
+        }
+
+        [HttpGet]
+        [Route("get-bars-by-rating")]
+        public async Task<JsonResult> GetBarsByRating(double from = 0, double to = 5)
+        {
+            var bars = await _barService.GetBarsByRatingAsync(from, to);
+            return new JsonResult(bars);
+        }
+
+        [HttpGet]
+        [Route("get-bestbars-by-user-id")]
+        public async Task<JsonResult> GetBestBarsByUserId(int id)
+        {
+            var bars = await _barService.GetPersonalBestBarsByUserId(id);
+            return new JsonResult(bars);
         }
     }
 }

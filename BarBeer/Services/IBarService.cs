@@ -9,11 +9,15 @@ namespace BarBeer.Services
 {
     public interface IBarService
     {
-        IEnumerable<Bar> GetBars();
-        Task<Bar> GetBarById(int id);
-        Task<int> CreateBar(BarViewModel model);
-        Task DeleteBarById(int id);
-        Task UpdateBar(int id, BarViewModel model);
-
+        IEnumerable<Bar> GetBarsAsync();
+        Task<Bar> GetBarByIdAsync(int id);
+        Task<int> CreateBarAsync(BarViewModel model);
+        Task DeleteBarByIdAsync(int id);
+        Task UpdateBarAsync(int id, BarViewModel model);
+        Task<IEnumerable<Comment>> GetCommentsByBarIdAsync(int id);
+        Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(int id);
+        Task<Bar> GetBarByNameAsync(string name);
+        Task<IEnumerable<Bar>> GetBarsByRatingAsync(double from, double to);
+        Task<IEnumerable<object>> GetPersonalBestBarsByUserId(int id);
     }
 }

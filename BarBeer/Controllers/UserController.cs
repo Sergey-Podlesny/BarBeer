@@ -35,18 +35,16 @@ namespace BarBeer.Controllers
         public async Task<JsonResult> Get(int id)
         {
             JsonResult result;
-            var user = await _userService.GetUserById(id);
-
-            if (user == null)
+            try
+            {
+                var user = await _userService.GetUserById(id);
+                result = new JsonResult(user);
+            }
+            catch(NotFoundException)
             {
                 HttpContext.Response.StatusCode = 404;
                 result = new JsonResult(StatusCode(404));
             }
-            else
-            {
-                result = new JsonResult(user);
-            }
-
             return result;
         }
 
@@ -63,10 +61,6 @@ namespace BarBeer.Controllers
             catch(DbUpdateException)
             {
                 HttpContext.Response.StatusCode = 400;
-            }
-            catch
-            {
-                HttpContext.Response.StatusCode = 500;
             }
             return new JsonResult(id);
         }
@@ -107,10 +101,6 @@ namespace BarBeer.Controllers
             catch(NotFoundException)
             {
                 HttpContext.Response.StatusCode = 404;
-            }
-            catch
-            {
-                HttpContext.Response.StatusCode = 500;
             }
             return new JsonResult(id);
         }
