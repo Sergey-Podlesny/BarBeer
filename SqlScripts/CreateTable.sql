@@ -13,7 +13,8 @@ create table Users
 	Id int primary key identity,
 	UserLogin varchar(50) not null unique,
 	UserPassword varchar(50) not null,
-	UserRole varchar(50) not null	
+	UserRole varchar(50) not null,
+	UserEmail varchar(50)
 )
 
 create table PersonalBestBars

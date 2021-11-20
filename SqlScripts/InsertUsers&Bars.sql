@@ -1,10 +1,10 @@
 use BarBeer
 insert into Users 
 values
-('Krot99', '12345', 'Visitor'),
-('Keks01', '17812', 'Visitor'),
-('Boss', '1111', 'Admin'),
-('Rabotyaga', '1011', 'Visitor')
+('Krot99', '12345', 'Visitor', 'email1'),
+('Keks01', '17812', 'Visitor', 'email2'),
+('Boss', '1111', 'Admin', 'email3'),
+('Rabotyaga', '1011', 'Visitor', 'email4')
 
 insert into Bars
 values

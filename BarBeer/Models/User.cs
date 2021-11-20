@@ -17,6 +17,7 @@ namespace BarBeer.Models
         public string UserLogin { get; set; }
         public string UserPassword { get; set; }
         public string UserRole { get; set; }
+        public string UserEmail { get; set; }
 
         public virtual ICollection<Comment> Comments { get; set; }
         public virtual ICollection<PersonalBestBar> PersonalBestBars { get; set; }
