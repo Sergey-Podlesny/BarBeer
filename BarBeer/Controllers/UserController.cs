@@ -9,6 +9,8 @@ using BarBeer.Models;
 using BarBeer.ViewModels;
 using BarBeer.Services;
 using BarBeer.Exceptions;
+using Microsoft.Data.SqlClient;
+using System.Text;
 
 namespace BarBeer.Controllers
 {
@@ -31,7 +33,8 @@ namespace BarBeer.Controllers
         }
 
 
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("{id}")]
         public async Task<JsonResult> Get(int id)
         {
             JsonResult result;
@@ -48,6 +51,16 @@ namespace BarBeer.Controllers
             return result;
         }
 
+        [HttpGet]
+        [Route("authorization")]
+        public async Task<JsonResult> Get([FromBody] UserViewModel model)
+        {
+
+            var authViewModel = await _userService.Authorization(model);
+
+            return new JsonResult(authViewModel);
+        }
+
 
         [HttpPost]
         public async Task<JsonResult> Post([FromBody]UserViewModel model)
@@ -58,15 +71,26 @@ namespace BarBeer.Controllers
                 id = await _userService.CreateUser(model);
                 HttpContext.Response.StatusCode = 201;
             }
-            catch(DbUpdateException)
+            catch(InvalidModelException ex)
             {
                 HttpContext.Response.StatusCode = 400;
+                await Microsoft.AspNetCore.Http.HttpResponseWritingExtensions.WriteAsync(HttpContext.Response, ex.Message);
+            }
+            catch(DbUpdateException ex)
+            {
+                var sqlEx = ex.InnerException as SqlException;
+                HttpContext.Response.StatusCode = 400;
+                if(sqlEx.Number == 2627)
+                {
+                    await Microsoft.AspNetCore.Http.HttpResponseWritingExtensions.WriteAsync(HttpContext.Response, "Пользователь с таким логином уже существует.");
+                }
             }
             return new JsonResult(id);
         }
 
 
-        [HttpPut("{id}")]
+        [HttpPut]
+        [Route("{id}")]
         public async Task<JsonResult> Put(int id, [FromBody]UserViewModel model)
         {
             try
@@ -90,7 +114,8 @@ namespace BarBeer.Controllers
             return new JsonResult(id);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete]
+        [Route("{id}")]
         public async Task<JsonResult> Delete(int id)
         {
             try

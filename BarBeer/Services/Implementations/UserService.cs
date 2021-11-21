@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Mail;
 
 namespace BarBeer.Services.Implementations
 {
@@ -32,8 +33,22 @@ namespace BarBeer.Services.Implementations
             return user;
         }
 
+        public async Task<User> GetUserByLogin(string login)
+        {
+            var user = await dbContext.Users.FirstOrDefaultAsync(user => user.UserLogin == login);
+            if (user == null)
+            {
+                throw new NotFoundException();
+            }
+            return user;
+        }
+
         public async Task<int> CreateUser(UserViewModel model)
         {
+
+            model.CheckValid();
+            
+
             var user = new User 
             { 
                 UserLogin = model.UserLogin, 
@@ -87,6 +102,32 @@ namespace BarBeer.Services.Implementations
                     }
                 }
             }
+        }
+
+        public async Task<AuthViewModel> Authorization(UserViewModel model)
+        {
+            AuthViewModel authViewModel = new AuthViewModel()
+            {
+                Status = true,
+                Errors = new List<string>()
+            };
+
+            try
+            {
+                var user = await GetUserByLogin(model.UserLogin);
+                if (user.UserPassword != model.UserPassword)
+                {
+                    authViewModel.Errors.Add("Неверный пароль.");
+                    authViewModel.Status = false;
+                }
+            }
+            catch(NotFoundException)
+            {
+                authViewModel.Errors.Add("Неверный логин.");
+                authViewModel.Status = false;
+            }
+
+            return authViewModel;
         }
     }
 }
