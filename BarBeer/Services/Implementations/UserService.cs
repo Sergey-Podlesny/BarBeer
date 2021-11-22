@@ -53,7 +53,8 @@ namespace BarBeer.Services.Implementations
             { 
                 UserLogin = model.UserLogin, 
                 UserPassword = model.UserPassword, 
-                UserRole = model.UserRole 
+                UserRole = model.UserRole,
+                UserEmail = model.UserEmail
             };
 
             await dbContext.AddAsync(user);
