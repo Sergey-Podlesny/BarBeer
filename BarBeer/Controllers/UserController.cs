@@ -51,9 +51,9 @@ namespace BarBeer.Controllers
             return result;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("authorization")]
-        public async Task<JsonResult> Get([FromBody] UserViewModel model)
+        public async Task<JsonResult> PostAuth([FromBody] UserViewModel model)
         {
 
             var authViewModel = await _userService.Authorization(model);

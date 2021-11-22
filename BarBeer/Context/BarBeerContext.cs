@@ -106,6 +106,7 @@ namespace BarBeer.Context
                     .IsUnicode(false);
 
                 entity.Property(e => e.UserEmail)
+                    .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
             });
