@@ -38,22 +38,22 @@ namespace BarBeer.Controllers
         public async Task<JsonResult> Get(int id)
         {
             JsonResult result;
-            try
+            var user = await _userService.GetUserById(id);
+            if(user != null)
             {
-                var user = await _userService.GetUserById(id);
                 result = new JsonResult(user);
             }
-            catch(NotFoundException)
+            else
             {
-                HttpContext.Response.StatusCode = 404;
-                result = new JsonResult(StatusCode(404));
+                HttpContext.Response.StatusCode = 500;
+                result = new JsonResult(StatusCode(500));
             }
             return result;
         }
 
         [HttpPost]
         [Route("authorization")]
-        public async Task<JsonResult> PostAuth([FromBody] UserViewModel model)
+        public async Task<JsonResult> PostAuthUser([FromBody] UserViewModel model)
         {
 
             var authViewModel = await _userService.Authorization(model);
@@ -63,7 +63,7 @@ namespace BarBeer.Controllers
 
 
         [HttpPost]
-        public async Task<JsonResult> Post([FromBody]UserViewModel model)
+        public async Task<JsonResult> PostCreateUser([FromBody]UserViewModel model)
         {
             int id = default;
             try
@@ -79,12 +79,13 @@ namespace BarBeer.Controllers
             catch(DbUpdateException ex)
             {
                 var sqlEx = ex.InnerException as SqlException;
-                HttpContext.Response.StatusCode = 400;
+                HttpContext.Response.StatusCode = 500;
                 if(sqlEx.Number == 2627)
                 {
                     await Microsoft.AspNetCore.Http.HttpResponseWritingExtensions.WriteAsync(HttpContext.Response, "Пользователь с таким логином уже существует.");
                 }
             }
+
             return new JsonResult(id);
         }
 
@@ -101,10 +102,6 @@ namespace BarBeer.Controllers
             catch (InvalidModelException)
             {
                 HttpContext.Response.StatusCode = 400;
-            }
-            catch (NotFoundException)
-            {
-                HttpContext.Response.StatusCode = 404;
             }
             catch (InternalServerErrorException)
             {
@@ -123,9 +120,9 @@ namespace BarBeer.Controllers
                 await _userService.DeleteUserById(id);
                 HttpContext.Response.StatusCode = 200;
             }
-            catch(NotFoundException)
+            catch(InternalServerErrorException)
             {
-                HttpContext.Response.StatusCode = 404;
+                HttpContext.Response.StatusCode = 500;
             }
             return new JsonResult(id);
         }

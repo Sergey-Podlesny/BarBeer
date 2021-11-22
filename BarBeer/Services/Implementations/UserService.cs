@@ -25,29 +25,18 @@ namespace BarBeer.Services.Implementations
         }
         public async Task<User> GetUserById(int id)
         {
-            var user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
-            if(user == null)
-            {
-                throw new NotFoundException();
-            }
-            return user;
+            return await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
         }
 
         public async Task<User> GetUserByLogin(string login)
         {
-            var user = await dbContext.Users.FirstOrDefaultAsync(user => user.UserLogin == login);
-            if (user == null)
-            {
-                throw new NotFoundException();
-            }
-            return user;
+            return await dbContext.Users.FirstOrDefaultAsync(user => user.UserLogin == login);
         }
 
         public async Task<int> CreateUser(UserViewModel model)
         {
 
             model.CheckValid();
-            
 
             var user = new User 
             { 
@@ -66,7 +55,7 @@ namespace BarBeer.Services.Implementations
             var user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
             if (user == null)
             {
-                throw new NotFoundException();
+                throw new InternalServerErrorException();
             }
             else
             {
@@ -76,32 +65,20 @@ namespace BarBeer.Services.Implementations
         }
         public async Task UpdateUser(int id, UserViewModel model)
         {
-            if (model == null)
+            model.CheckValid();
+
+            var user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+            if (user == null)
             {
-                throw new InvalidModelException();
+                throw new InternalServerErrorException();
             }
             else
             {
-                var user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
-                if (user == null)
-                {
-                    throw new NotFoundException();
-                }
-                else
-                {
-                    user.UserLogin = model.UserLogin;
-                    user.UserPassword = model.UserPassword;
-                    user.UserRole = model.UserRole;
-                    try
-                    {
-                        dbContext.Users.Update(user);
-                        dbContext.SaveChanges();
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InternalServerErrorException(ex.Message);
-                    }
-                }
+                user.UserLogin = model.UserLogin;
+                user.UserPassword = model.UserPassword;
+                user.UserRole = model.UserRole;
+                dbContext.Users.Update(user);
+                dbContext.SaveChanges();
             }
         }
 
@@ -113,18 +90,15 @@ namespace BarBeer.Services.Implementations
                 Errors = new List<string>()
             };
 
-            try
+            var user = await GetUserByLogin(model.UserLogin);
+            if (user == null)
             {
-                var user = await GetUserByLogin(model.UserLogin);
-                if (user.UserPassword != model.UserPassword)
-                {
-                    authViewModel.Errors.Add("Неверный пароль.");
-                    authViewModel.Status = false;
-                }
+                authViewModel.Errors.Add("Неверный логин или пароль.");
+                authViewModel.Status = false;
             }
-            catch(NotFoundException)
+            else if (user.UserPassword != model.UserPassword)
             {
-                authViewModel.Errors.Add("Неверный логин.");
+                authViewModel.Errors.Add("Неверный логин или пароль.");
                 authViewModel.Status = false;
             }
 

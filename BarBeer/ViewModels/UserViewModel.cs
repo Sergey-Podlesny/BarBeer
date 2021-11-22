@@ -18,6 +18,11 @@ namespace BarBeer.ViewModels
 
         public void CheckValid()
         {
+            if(this == null || string.IsNullOrEmpty(UserLogin) || string.IsNullOrEmpty(UserPassword) || string.IsNullOrEmpty(UserRole) || string.IsNullOrEmpty(UserEmail))
+            {
+                throw new InvalidModelException();
+            }
+
             if (UserRole != Roles.Admin.ToString() && UserRole != Roles.Visitor.ToString())
             {
                 throw new InvalidModelException("Введена несуществующая роль.");
