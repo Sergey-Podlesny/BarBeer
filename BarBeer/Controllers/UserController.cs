@@ -11,6 +11,7 @@ using BarBeer.Services;
 using BarBeer.Exceptions;
 using Microsoft.Data.SqlClient;
 using System.Text;
+using BarBeer.ViewModels.ResponseViewModel;
 
 namespace BarBeer.Controllers
 {
@@ -65,28 +66,27 @@ namespace BarBeer.Controllers
         [HttpPost]
         public async Task<JsonResult> PostCreateUser([FromBody]UserViewModel model)
         {
-            int id = default;
+            RegViewModel regViewModel = new RegViewModel();
+
             try
             {
-                id = await _userService.CreateUser(model);
+                regViewModel.Id = await _userService.CreateUser(model);
                 HttpContext.Response.StatusCode = 201;
             }
             catch(InvalidModelException ex)
             {
-                HttpContext.Response.StatusCode = 400;
-                await Microsoft.AspNetCore.Http.HttpResponseWritingExtensions.WriteAsync(HttpContext.Response, ex.Message);
+                regViewModel.Errors.Add(ex.Message);
             }
             catch(DbUpdateException ex)
             {
                 var sqlEx = ex.InnerException as SqlException;
-                HttpContext.Response.StatusCode = 500;
                 if(sqlEx.Number == 2627)
                 {
-                    await Microsoft.AspNetCore.Http.HttpResponseWritingExtensions.WriteAsync(HttpContext.Response, "Пользователь с таким логином уже существует.");
+                    regViewModel.Errors.Add("Пользователь с таким логином уже существует.");
                 }
             }
 
-            return new JsonResult(id);
+            return new JsonResult(regViewModel);
         }
 
 
@@ -101,7 +101,7 @@ namespace BarBeer.Controllers
             }
             catch (InvalidModelException)
             {
-                HttpContext.Response.StatusCode = 400;
+                HttpContext.Response.StatusCode = 200;
             }
             catch (InternalServerErrorException)
             {

@@ -1,5 +1,6 @@
 ﻿using BarBeer.Models;
 using BarBeer.ViewModels;
+using BarBeer.ViewModels.ResponseViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;

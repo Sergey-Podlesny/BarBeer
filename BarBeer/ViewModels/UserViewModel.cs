@@ -20,7 +20,7 @@ namespace BarBeer.ViewModels
         {
             if(this == null || string.IsNullOrEmpty(UserLogin) || string.IsNullOrEmpty(UserPassword) || string.IsNullOrEmpty(UserRole) || string.IsNullOrEmpty(UserEmail))
             {
-                throw new InvalidModelException();
+                throw new InvalidModelException("Заполнены не все поля.");
             }
 
             if (UserRole != Roles.Admin.ToString() && UserRole != Roles.Visitor.ToString())

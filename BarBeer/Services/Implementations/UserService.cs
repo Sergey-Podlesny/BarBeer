@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Mail;
+using BarBeer.ViewModels.ResponseViewModel;
 
 namespace BarBeer.Services.Implementations
 {
@@ -77,6 +78,7 @@ namespace BarBeer.Services.Implementations
                 user.UserLogin = model.UserLogin;
                 user.UserPassword = model.UserPassword;
                 user.UserRole = model.UserRole;
+                user.UserEmail = model.UserEmail;
                 dbContext.Users.Update(user);
                 dbContext.SaveChanges();
             }
