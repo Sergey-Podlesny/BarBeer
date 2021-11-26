@@ -71,7 +71,7 @@ namespace BarBeer.Services.Implementations
             var user = await dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
             if (user == null)
             {
-                throw new InternalServerErrorException();
+                throw new InternalServerErrorException("Пользователя с таким ID не существует.");
             }
             else
             {

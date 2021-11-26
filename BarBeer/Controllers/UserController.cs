@@ -94,21 +94,22 @@ namespace BarBeer.Controllers
         [Route("{id}")]
         public async Task<JsonResult> Put(int id, [FromBody]UserViewModel model)
         {
+            UpdViewModel updViewModel = new UpdViewModel() { Id = id };
+
             try
             {
                 await _userService.UpdateUser(id, model);
-                HttpContext.Response.StatusCode = 200;
             }
-            catch (InvalidModelException)
+            catch (InvalidModelException ex)
             {
-                HttpContext.Response.StatusCode = 200;
+                updViewModel.Errors.Add(ex.Message);
             }
-            catch (InternalServerErrorException)
+            catch (InternalServerErrorException ex)
             {
-                HttpContext.Response.StatusCode = 500;
+                updViewModel.Errors.Add(ex.Message);
             }
 
-            return new JsonResult(id);
+            return new JsonResult(updViewModel);
         }
 
         [HttpDelete]
