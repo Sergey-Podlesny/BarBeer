@@ -119,7 +119,6 @@ namespace BarBeer.Controllers
             try
             {
                 await _userService.DeleteUserById(id);
-                HttpContext.Response.StatusCode = 200;
             }
             catch(InternalServerErrorException)
             {

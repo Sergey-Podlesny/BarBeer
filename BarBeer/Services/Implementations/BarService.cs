@@ -47,7 +47,7 @@ namespace BarBeer.Services.Implementations
             var bar = await dbContext.Bars.FirstOrDefaultAsync(user => user.Id == id);
             if (bar == null)
             {
-                throw new NotFoundException();
+                throw new InternalServerErrorException();
             }
             else
             {
@@ -60,34 +60,19 @@ namespace BarBeer.Services.Implementations
 
         public async Task UpdateBarAsync(int id, BarViewModel model)
         {
-            if (model == null)
+            var bar = await dbContext.Bars.FirstOrDefaultAsync(bar => bar.Id == id);
+            if (bar == null)
             {
-                throw new InvalidModelException();
+                throw new InternalServerErrorException();
             }
             else
             {
-                var bar = await dbContext.Bars.FirstOrDefaultAsync(bar => bar.Id == id);
-                if (bar == null)
-                {
-                    throw new NotFoundException();
-                }
-                else
-                {
-
-                    bar.BarName = model.BarName;
-                    bar.BarImage = model.BarImage;
-                    bar.BarRating = model.BarRating;
-                    bar.BarLocation = model.BarLocation;
-                    try
-                    {
-                        dbContext.Bars.Update(bar);
-                        dbContext.SaveChanges();
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InternalServerErrorException(ex.Message);
-                    }
-                }
+                bar.BarName = model.BarName;
+                bar.BarImage = model.BarImage;
+                bar.BarRating = model.BarRating;
+                bar.BarLocation = model.BarLocation;
+                dbContext.Bars.Update(bar);
+                dbContext.SaveChanges();
             }
         }
 

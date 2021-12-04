@@ -36,15 +36,15 @@ namespace BarBeer.Controllers
         public async Task<JsonResult> GetBar(int id)
         {
             JsonResult result;
-            try
+            var bar = await _barService.GetBarByIdAsync(id);
+            if(bar != null)
             {
-                var bar = await _barService.GetBarByIdAsync(id);
                 result = new JsonResult(bar);
             }
-            catch(NotFoundException)
+            else
             {
-                HttpContext.Response.StatusCode = 404;
-                result = new JsonResult(StatusCode(404));
+                HttpContext.Response.StatusCode = 500;
+                result = new JsonResult(StatusCode(500));
             }
             return result;
         }
@@ -60,7 +60,7 @@ namespace BarBeer.Controllers
             }
             catch (DbUpdateException)
             {
-                HttpContext.Response.StatusCode = 400;
+                HttpContext.Response.StatusCode = 500;
             }
             return new JsonResult(id);
         }
@@ -77,10 +77,6 @@ namespace BarBeer.Controllers
             {
                 HttpContext.Response.StatusCode = 400;
             }
-            catch (NotFoundException)
-            {
-                HttpContext.Response.StatusCode = 404;
-            }
             catch (InternalServerErrorException)
             {
                 HttpContext.Response.StatusCode = 500;
@@ -96,9 +92,9 @@ namespace BarBeer.Controllers
             {
                 await _barService.DeleteBarByIdAsync(id);
             }
-            catch (NotFoundException)
+            catch (InternalServerErrorException)
             {
-                HttpContext.Response.StatusCode = 404;
+                HttpContext.Response.StatusCode = 500;
             }
             return new JsonResult(id);
         }
