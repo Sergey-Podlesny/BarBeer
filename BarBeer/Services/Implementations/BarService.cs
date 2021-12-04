@@ -33,7 +33,7 @@ namespace BarBeer.Services.Implementations
             {
                 BarName = model.BarName,
                 BarImage = model.BarImage,
-                BarRating = model.BarRating,
+                BarRating = 0,
                 BarLocation = model.BarLocation,
             };
 
@@ -69,7 +69,6 @@ namespace BarBeer.Services.Implementations
             {
                 bar.BarName = model.BarName;
                 bar.BarImage = model.BarImage;
-                bar.BarRating = model.BarRating;
                 bar.BarLocation = model.BarLocation;
                 dbContext.Bars.Update(bar);
                 dbContext.SaveChanges();

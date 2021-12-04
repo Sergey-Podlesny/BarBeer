@@ -9,7 +9,6 @@ namespace BarBeer.ViewModels
     {
         public string BarName { get; set; }
         public string BarImage { get; set; }
-        public double? BarRating { get; set; }
         public string BarLocation { get; set; }
     }
 }

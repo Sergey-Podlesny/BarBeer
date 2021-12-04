@@ -138,5 +138,7 @@ namespace BarBeer.Controllers
             var bars = await _barService.GetPersonalBestBarsByUserId(id);
             return new JsonResult(bars);
         }
+
+        
     }
 }
