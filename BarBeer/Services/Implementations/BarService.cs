@@ -37,7 +37,7 @@ namespace BarBeer.Services.Implementations
                 BarLocation = model.BarLocation,
             };
 
-            await dbContext.AddAsync(bar);
+            await dbContext.Bars.AddAsync(bar);
             await dbContext.SaveChangesAsync();
             return bar.Id;
         }
@@ -99,7 +99,7 @@ namespace BarBeer.Services.Implementations
             return bars.AsEnumerable();
         }
 
-        public async Task<IEnumerable<object>> GetPersonalBestBarsByUserId(int id)
+        public async Task<IEnumerable<object>> GetPersonalBestBarsByUserIdAsync(int id)
         {
             var bestBars = await dbContext.PersonalBestBars
                 .Where(pBar => pBar.UserId == id)
@@ -115,6 +115,34 @@ namespace BarBeer.Services.Implementations
                 }).ToListAsync();
 
             return bestBars.AsEnumerable();
+        }
+
+        public async Task<double> LeaveFeedbackAsync(FeedbackViewModel model)
+        {
+            var bar = await GetBarByIdAsync(model.BarId);
+            var comments = await GetCommentsByBarIdAsync(model.BarId);
+            if (bar == null || comments == null)
+            {
+                throw new InternalServerErrorException();
+            }
+
+            bar.BarRating = (bar.BarRating * comments.Count() + model.Rating) / (comments.Count() + 1);
+
+            var newComment = new Comment()
+            {
+                BarId = model.BarId,
+                UserId = model.UserId,
+                Text = model.Comment
+            };
+
+            dbContext.Bars.Update(bar);
+            dbContext.Comments.Add(newComment);
+
+            dbContext.SaveChanges();
+
+            return (double)bar.BarRating;
+
+
         }
     }
 }

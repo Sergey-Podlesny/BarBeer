@@ -18,6 +18,7 @@ namespace BarBeer.Services
         Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(int id);
         Task<Bar> GetBarByNameAsync(string name);
         Task<IEnumerable<Bar>> GetBarsByRatingAsync(double from, double to);
-        Task<IEnumerable<object>> GetPersonalBestBarsByUserId(int id);
+        Task<IEnumerable<object>> GetPersonalBestBarsByUserIdAsync(int id);
+        Task<double> LeaveFeedbackAsync(FeedbackViewModel model);
     }
 }

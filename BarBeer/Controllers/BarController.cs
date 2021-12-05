@@ -73,10 +73,6 @@ namespace BarBeer.Controllers
             {
                 await _barService.UpdateBarAsync(id, model);
             }
-            catch (InvalidModelException)
-            {
-                HttpContext.Response.StatusCode = 400;
-            }
             catch (InternalServerErrorException)
             {
                 HttpContext.Response.StatusCode = 500;
@@ -135,10 +131,27 @@ namespace BarBeer.Controllers
         [Route("get-bestbars-by-user-id")]
         public async Task<JsonResult> GetBestBarsByUserId(int id)
         {
-            var bars = await _barService.GetPersonalBestBarsByUserId(id);
+            var bars = await _barService.GetPersonalBestBarsByUserIdAsync(id);
             return new JsonResult(bars);
         }
 
-        
+        [HttpPost]
+        [Route("leave-feedback")]
+        public async Task<JsonResult> PostLeaveFeedback(FeedbackViewModel model)
+        {
+            JsonResult result;
+            try
+            {
+                var currentRating = await _barService.LeaveFeedbackAsync(model);
+                result = new JsonResult(currentRating);
+                HttpContext.Response.StatusCode = 201;
+            }
+            catch (InternalServerErrorException)
+            {
+                HttpContext.Response.StatusCode = 500;
+                result = new JsonResult(StatusCode(500));
+            }
+            return result;
+        }
     }
 }

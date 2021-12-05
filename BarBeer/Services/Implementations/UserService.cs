@@ -47,7 +47,7 @@ namespace BarBeer.Services.Implementations
                 UserEmail = model.UserEmail
             };
 
-            await dbContext.AddAsync(user);
+            await dbContext.Users.AddAsync(user);
             await dbContext.SaveChangesAsync();
             return user.Id;
         }
