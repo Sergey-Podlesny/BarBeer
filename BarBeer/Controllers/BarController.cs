@@ -96,34 +96,26 @@ namespace BarBeer.Controllers
         }
 
         [HttpGet]
-        [Route("get-comments-by-bar-id")]
-        public async Task<JsonResult> GetCommentsByBarId(int id)
+        [Route("get-comments-by-bar-name")]
+        public async Task<JsonResult> GetCommentsByBarName(string name)
         {
-            var comments = await _barService.GetCommentsByBarIdAsync(id);
+            var comments = await _barService.GetCommentsByBarNameAsync(name);
             return new JsonResult(comments);
         }
 
         [HttpGet]
-        [Route("get-comments-by-user-id")]
-        public async Task<JsonResult> GetCommentsByUserId(int id)
+        [Route("get-comments-by-user-login")]
+        public async Task<JsonResult> GetCommentsByUserLogin(string login)
         {
-            var comments = await _barService.GetCommentsByUserIdAsync(id);
+            var comments = await _barService.GetCommentsByUserLoginAsync(login);
             return new JsonResult(comments);
         }
-
+      
         [HttpGet]
-        [Route("get-bar-by-name")]
-        public async Task<JsonResult> GetBarByName(string name)
+        [Route("get-bars-by-rating-and-name")]
+        public async Task<JsonResult> GetBarsByRatingAndName(double from = 0, double to = 5, string name = default)
         {
-            var bar = await _barService.GetBarByNameAsync(name);
-            return new JsonResult(bar);
-        }
-
-        [HttpGet]
-        [Route("get-bars-by-rating")]
-        public async Task<JsonResult> GetBarsByRating(double from = 0, double to = 5)
-        {
-            var bars = await _barService.GetBarsByRatingAsync(from, to);
+            var bars = await _barService.GetBarsByRatingAndNameAsync(from, to, name);
             return new JsonResult(bars);
         }
 
@@ -133,6 +125,15 @@ namespace BarBeer.Controllers
         {
             var bars = await _barService.GetPersonalBestBarsByUserIdAsync(id);
             return new JsonResult(bars);
+        }
+
+
+        [HttpPost]
+        [Route("save-bestbar")]
+        public async Task<JsonResult> PostSaveBestBar(int barId, int userId)
+        {
+            var id = await _barService.SaveBestBar(barId, userId);
+            return new JsonResult(id);
         }
 
         [HttpPost]

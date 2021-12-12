@@ -12,7 +12,9 @@ namespace BarBeer.Models
         public int UserId { get; set; }
         public string Text { get; set; }
 
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual Bar Bar { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual User User { get; set; }
     }
 }

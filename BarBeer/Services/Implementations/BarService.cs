@@ -27,6 +27,12 @@ namespace BarBeer.Services.Implementations
             return bar;
         }
 
+        public async Task<Bar> GetBarByNameAsync(string name)
+        {
+            var bar = await dbContext.Bars.FirstOrDefaultAsync(bar => bar.BarName == name);
+            return bar;
+        }
+
         public async Task<int> CreateBarAsync(BarViewModel model)
         {
             var bar = new Bar
@@ -75,27 +81,32 @@ namespace BarBeer.Services.Implementations
             }
         }
 
-        public async Task<IEnumerable<Comment>> GetCommentsByBarIdAsync(int id)
+        public async Task<IEnumerable<Comment>> GetCommentsByBarNameAsync(string name)
         {
-            var comments = await dbContext.Comments.Where(c => c.BarId == id).ToListAsync();
+            var bar = await GetBarByNameAsync(name);
+            if(bar == null)
+            {
+                return new List<Comment>();
+            }
+            var comments = await dbContext.Comments.Where(c => c.BarId == bar.Id).ToListAsync();
             return comments.AsEnumerable();
         }
 
-        public async Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(int id)
+        public async Task<IEnumerable<Comment>> GetCommentsByUserLoginAsync(string login)
         {
-            var comments = await dbContext.Comments.Where(c => c.UserId == id).ToListAsync();
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserLogin == login);
+            if (user == null)
+            {
+                return new List<Comment>();
+            }
+            var comments = await dbContext.Comments.Where(c => c.UserId == user.Id).ToListAsync();
             return comments.AsEnumerable();
         }
 
-        public async Task<Bar> GetBarByNameAsync(string name)
-        {
-            var bar = await dbContext.Bars.FirstOrDefaultAsync(bar => bar.BarName.ToLower() == name.ToLower());
-            return bar;
-        }
-
-        public async Task<IEnumerable<Bar>> GetBarsByRatingAsync(double fromRating, double toRating)
+        public async Task<IEnumerable<Bar>> GetBarsByRatingAndNameAsync(double fromRating, double toRating, string name)
         {
             var bars = await dbContext.Bars.Where(bar => bar.BarRating >= fromRating && bar.BarRating <= toRating).ToListAsync();
+            bars = string.IsNullOrEmpty(name) ? bars : bars.Where(bar => bar.BarName.ToLower() == name.ToLower()).ToList();
             return bars.AsEnumerable();
         }
 
@@ -120,7 +131,7 @@ namespace BarBeer.Services.Implementations
         public async Task<double> LeaveFeedbackAsync(FeedbackViewModel model)
         {
             var bar = await GetBarByIdAsync(model.BarId);
-            var comments = await GetCommentsByBarIdAsync(model.BarId);
+            var comments = await GetCommentsByBarNameAsync(bar.BarName);
             if (bar == null || comments == null)
             {
                 throw new InternalServerErrorException();
@@ -143,6 +154,20 @@ namespace BarBeer.Services.Implementations
             return (double)bar.BarRating;
 
 
+        }
+
+        public async Task<int> SaveBestBar(int barId, int userId)
+        {
+            var newBestBar = new PersonalBestBar()
+            {
+                UserId = userId,
+                BarId = barId
+            };
+
+            await dbContext.PersonalBestBars.AddAsync(newBestBar);
+            dbContext.SaveChanges();
+
+            return newBestBar.Id;
         }
     }
 }
