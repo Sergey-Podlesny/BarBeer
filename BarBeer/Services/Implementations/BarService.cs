@@ -2,6 +2,7 @@
 using BarBeer.Exceptions;
 using BarBeer.Models;
 using BarBeer.ViewModels;
+using BarBeer.ViewModels.ResponseViewModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -81,26 +82,55 @@ namespace BarBeer.Services.Implementations
             }
         }
 
-        public async Task<IEnumerable<Comment>> GetCommentsByBarNameAsync(string name)
+        public async Task<IEnumerable<CommentViewModel>> GetCommentsByBarNameAsync(string name)
         {
             var bar = await GetBarByNameAsync(name);
             if(bar == null)
             {
-                return new List<Comment>();
+                return new List<CommentViewModel>();
             }
             var comments = await dbContext.Comments.Where(c => c.BarId == bar.Id).ToListAsync();
-            return comments.AsEnumerable();
+
+            var commentViewModels = new List<CommentViewModel>();
+
+            foreach (var comment in comments)
+            {
+                commentViewModels.Add(new CommentViewModel
+                {
+                    BarName = bar.BarName,
+                    Login = (await dbContext.Users.FirstOrDefaultAsync(u => u.Id == comment.UserId)).UserLogin,
+                    Text = comment.Text
+                });
+
+            }
+
+            return commentViewModels.AsEnumerable();
         }
 
-        public async Task<IEnumerable<Comment>> GetCommentsByUserLoginAsync(string login)
+        public async Task<IEnumerable<CommentViewModel>> GetCommentsByUserLoginAsync(string login)
         {
             var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserLogin == login);
             if (user == null)
             {
-                return new List<Comment>();
+                return new List<CommentViewModel>();
             }
             var comments = await dbContext.Comments.Where(c => c.UserId == user.Id).ToListAsync();
-            return comments.AsEnumerable();
+
+            var commentViewModels = new List<CommentViewModel>();
+            
+            foreach(var comment in comments)
+            {
+                commentViewModels.Add(new CommentViewModel
+                {
+                    BarName = (await GetBarByIdAsync(comment.BarId)).BarName,
+                    Login = user.UserLogin,
+                    Text = comment.Text
+                });
+
+            }
+
+
+            return commentViewModels.AsEnumerable();
         }
 
         public async Task<IEnumerable<Bar>> GetBarsByRatingAndNameAsync(double fromRating, double toRating, string name)

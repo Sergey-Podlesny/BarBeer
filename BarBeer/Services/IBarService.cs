@@ -1,5 +1,6 @@
 ﻿using BarBeer.Models;
 using BarBeer.ViewModels;
+using BarBeer.ViewModels.ResponseViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +16,8 @@ namespace BarBeer.Services
         Task<int> CreateBarAsync(BarViewModel model);
         Task DeleteBarByIdAsync(int id);
         Task UpdateBarAsync(int id, BarViewModel model);
-        Task<IEnumerable<Comment>> GetCommentsByBarNameAsync(string name);
-        Task<IEnumerable<Comment>> GetCommentsByUserLoginAsync(string login);
+        Task<IEnumerable<CommentViewModel>> GetCommentsByUserLoginAsync(string login);
+        Task<IEnumerable<CommentViewModel>> GetCommentsByBarNameAsync(string name);
         Task<IEnumerable<Bar>> GetBarsByRatingAndNameAsync(double from, double to, string name);
         Task<IEnumerable<object>> GetPersonalBestBarsByUserIdAsync(int id);
         Task<double> LeaveFeedbackAsync(FeedbackViewModel model);
