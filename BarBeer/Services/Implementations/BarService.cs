@@ -129,10 +129,11 @@ namespace BarBeer.Services.Implementations
         }
 
         public async Task<double> LeaveFeedbackAsync(FeedbackViewModel model)
-        {
-            var bar = await GetBarByIdAsync(model.BarId);
+        {            
+            var bar = await GetBarByNameAsync(model.barName);
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserLogin == model.login);
             var comments = await GetCommentsByBarNameAsync(bar.BarName);
-            if (bar == null || comments == null)
+            if (bar == null || comments == null || user == null)
             {
                 throw new InternalServerErrorException();
             }
@@ -141,8 +142,8 @@ namespace BarBeer.Services.Implementations
 
             var newComment = new Comment()
             {
-                BarId = model.BarId,
-                UserId = model.UserId,
+                BarId = bar.Id,
+                UserId = user.Id,
                 Text = model.Comment
             };
 

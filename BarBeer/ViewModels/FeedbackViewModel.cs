@@ -7,8 +7,8 @@ namespace BarBeer.ViewModels
 {
     public class FeedbackViewModel
     {
-        public int UserId { get; set; }
-        public int BarId { get; set; }
+        public string login { get; set; }
+        public string barName { get; set; }
         public int Rating { get; set; }
         public string Comment { get; set; }
     }
